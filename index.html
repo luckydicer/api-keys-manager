@@ -6,48 +6,80 @@
   <title>API Keys Manager</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; }
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    h1 { text-align: center; margin-bottom: 24px; color: #333; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; min-height: 100vh; }
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 24px; color: #1a1a2e; }
     h2 { margin-bottom: 16px; color: #333; font-size: 18px; }
+    h3 { margin-bottom: 12px; color: #444; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
     .form-group { margin-bottom: 16px; }
-    label { display: block; margin-bottom: 6px; color: #555; font-weight: 500; }
-    input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-    input:focus { outline: none; border-color: #007bff; }
-    button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
-    button:hover { background: #0056b3; }
+    label { display: block; margin-bottom: 6px; color: #555; font-weight: 500; font-size: 14px; }
+    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    textarea { resize: vertical; min-height: 100px; font-family: 'Monaco', 'Menlo', monospace; }
+
+    button { padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #4f46e5; }
     button:disabled { background: #ccc; cursor: not-allowed; }
-    .btn-secondary { background: #6c757d; }
-    .btn-secondary:hover { background: #545b62; }
-    .btn-danger { background: #dc3545; }
-    .btn-danger:hover { background: #c82333; }
-    .error { color: #dc3545; font-size: 13px; margin-top: 6px; }
-    .success { color: #28a745; font-size: 13px; margin-top: 6px; text-align: center; }
-    .key-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 8px; }
-    .key-info { flex: 1; }
-    .key-provider { font-weight: 600; color: #333; }
-    .key-value { font-size: 12px; color: #666; margin-top: 4px; font-family: monospace; }
-    .key-actions { display: flex; gap: 8px; }
-    .key-actions button { width: auto; padding: 6px 12px; }
-    .hidden { display: none; }
+    button.btn-secondary { background: #64748b; }
+    button.btn-secondary:hover { background: #475569; }
+    button.btn-danger { background: #ef4444; }
+    button.btn-danger:hover { background: #dc2626; }
+    button.btn-small { padding: 6px 12px; font-size: 12px; }
+    button.btn-success { background: #22c55e; }
+    button.btn-success:hover { background: #16a34a; }
+
+    .error { color: #ef4444; font-size: 13px; margin-top: 6px; }
+    .success { color: #22c55e; font-size: 13px; margin-top: 6px; }
+    .hidden { display: none !important; }
+
     .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-    .tab { flex: 1; padding: 10px; text-align: center; background: #e9ecef; border: none; border-radius: 6px; cursor: pointer; }
-    .tab.active { background: #007bff; color: white; }
-    .tab:hover:not(.active) { background: #dee2e6; }
-    .logout-btn { background: #dc3545; margin-top: 16px; }
-    .api-url { text-align: center; margin-bottom: 16px; }
-    .api-url input { text-align: center; background: #f8f9fa; }
+    .tab { flex: 1; padding: 12px; text-align: center; background: #e2e8f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .tab.active { background: #6366f1; color: white; }
+    .tab:hover:not(.active) { background: #cbd5e1; }
+
+    .nav-tabs { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 20px; }
+    .nav-tab { flex: 1; padding: 10px 16px; text-align: center; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; color: #64748b; transition: all 0.2s; }
+    .nav-tab.active { background: white; color: #6366f1; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    .key-item { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; }
+    .key-info { flex: 1; }
+    .key-provider { font-weight: 600; color: #333; text-transform: capitalize; }
+    .key-name { font-size: 13px; color: #6366f1; margin-top: 4px; }
+    .key-value { font-size: 12px; color: #64748b; margin-top: 4px; font-family: monospace; }
+    .key-actions { display: flex; gap: 8px; }
+
+    .chat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 768px) { .chat-grid { grid-template-columns: 1fr; } }
+
+    .output-box { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 10px; min-height: 200px; max-height: 400px; overflow-y: auto; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; white-space: pre-wrap; word-break: break-word; }
+    .output-box .error { color: #f38ba8; }
+    .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .output-header span { color: #888; font-size: 12px; }
+
+    .loading { display: inline-block; width: 20px; height: 20px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .model-select { margin-bottom: 12px; }
+    .config-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .api-url-bar { background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+    .api-url-bar input { background: white; }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
+    .empty-state p { margin-bottom: 16px; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>API Keys Manager</h1>
-    
-    <div class="api-url card">
-      <div class="form-group">
+
+    <div class="api-url-bar">
+      <div class="form-group" style="margin-bottom: 0;">
         <label>Backend API URL</label>
-        <input type="text" id="apiUrl" value="http://localhost:3000" placeholder="http://your-vps-ip:3000">
+        <input type="text" id="apiUrl" value="https://clumsily-implant-threaten.ngrok-free.dev" placeholder="http://your-vps-ip:3000">
       </div>
     </div>
 
@@ -57,7 +89,7 @@
           <button class="tab active" data-tab="login">Login</button>
           <button class="tab" data-tab="register">Register</button>
         </div>
-        
+
         <div id="loginForm">
           <div class="form-group">
             <label>Username</label>
@@ -86,39 +118,104 @@
       </div>
     </div>
 
-    <div id="keysSection" class="hidden">
-      <div class="card">
-        <h2>Add / Update API Key</h2>
-        <div class="form-group">
-          <label>Provider</label>
-          <input type="text" id="provider" placeholder="e.g., openrouter, chutes, openai">
-        </div>
-        <div class="form-group">
-          <label>API Key</label>
-          <input type="password" id="apiKey" placeholder="Enter your API key">
-        </div>
-        <button onclick="saveKey()">Save Key</button>
-        <div id="saveError" class="error"></div>
-        <div id="saveSuccess" class="success"></div>
+    <div id="mainSection" class="hidden">
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="chat">Chat</button>
+        <button class="nav-tab" data-tab="keys">API Keys</button>
       </div>
 
-      <div class="card">
-        <h2>Your API Keys</h2>
-        <div id="keysList"></div>
+      <div id="chatTab">
+        <div class="card">
+          <h3>Configuration</h3>
+          <div class="config-row">
+            <div class="form-group">
+              <label>Provider</label>
+              <select id="providerSelect" onchange="onProviderChange()">
+                <option value="">Select provider...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Model</label>
+              <select id="modelSelect" onchange="onModelChange()">
+                <option value="">Select model...</option>
+              </select>
+            </div>
+          </div>
+          <div class="config-row">
+            <div class="form-group">
+              <label>Temperature</label>
+              <input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>Max Tokens</label>
+              <input type="number" id="maxTokens" value="2048" min="1" max="32000">
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-grid">
+          <div class="card">
+            <h3>Input</h3>
+            <div class="form-group">
+              <textarea id="promptInput" placeholder="Enter your prompt here..."></textarea>
+            </div>
+            <button id="sendBtn" onclick="sendMessage()">Send</button>
+          </div>
+
+          <div class="card">
+            <div class="output-header">
+              <h3>Output</h3>
+              <span id="outputStatus"></span>
+              <button class="btn-small btn-secondary" onclick="copyOutput()">Copy</button>
+            </div>
+            <div id="outputBox" class="output-box">Response will appear here...</div>
+          </div>
+        </div>
       </div>
 
-      <button onclick="logout()" class="logout-btn">Logout</button>
+      <div id="keysTab" class="hidden">
+        <div class="card">
+          <h3>Add New API Key</h3>
+          <div class="config-row">
+            <div class="form-group">
+              <label>Provider</label>
+              <select id="newKeyProvider">
+                <option value="">Select provider...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Key Name</label>
+              <input type="text" id="newKeyName" placeholder="e.g., Production Key 1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>API Key</label>
+            <input type="password" id="newKeyValue" placeholder="Enter your API key">
+          </div>
+          <button onclick="addKey()">Add Key</button>
+          <div id="addKeyError" class="error"></div>
+          <div id="addKeySuccess" class="success"></div>
+        </div>
+
+        <div class="card">
+          <h3>Your API Keys</h3>
+          <div id="keysList"></div>
+        </div>
+
+        <button onclick="logout()" class="btn-danger" style="width: 100%; margin-top: 16px;">Logout</button>
+      </div>
     </div>
   </div>
 
   <script>
     let token = localStorage.getItem('token');
     let username = localStorage.getItem('username');
+    let providers = [];
+    let currentModels = [];
 
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
+    document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         const tabName = tab.dataset.tab;
         document.getElementById('loginForm').classList.toggle('hidden', tabName !== 'login');
@@ -126,18 +223,45 @@
       });
     });
 
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const tabName = tab.dataset.tab;
+        document.getElementById('chatTab').classList.toggle('hidden', tabName !== 'chat');
+        document.getElementById('keysTab').classList.toggle('hidden', tabName !== 'keys');
+      });
+    });
+
     function getApiUrl() {
       return document.getElementById('apiUrl').value.replace(/\/$/, '');
     }
 
-    function showAuth() {
-      document.getElementById('authSection').classList.remove('hidden');
-      document.getElementById('keysSection').classList.add('hidden');
+    async function api(endpoint, options = {}) {
+      const res = await fetch(`${getApiUrl()}${endpoint}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          ...options.headers
+        }
+      });
+      if (res.status === 401 || res.status === 403) {
+        logout();
+        throw new Error('Session expired');
+      }
+      return res.json();
     }
 
-    function showKeys() {
+    function showAuth() {
+      document.getElementById('authSection').classList.remove('hidden');
+      document.getElementById('mainSection').classList.add('hidden');
+    }
+
+    function showMain() {
       document.getElementById('authSection').classList.add('hidden');
-      document.getElementById('keysSection').classList.remove('hidden');
+      document.getElementById('mainSection').classList.remove('hidden');
+      loadProviders();
       loadKeys();
     }
 
@@ -148,15 +272,13 @@
       errorEl.textContent = '';
 
       try {
-        const res = await fetch(`${getApiUrl()}/auth/login`, {
+        const data = await api('/auth/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: usernameVal, password })
         });
-        const data = await res.json();
 
-        if (!res.ok) {
-          errorEl.textContent = data.error || 'Login failed';
+        if (data.error) {
+          errorEl.textContent = data.error;
           return;
         }
 
@@ -164,7 +286,7 @@
         username = data.user.username;
         localStorage.setItem('token', token);
         localStorage.setItem('username', username);
-        showKeys();
+        showMain();
       } catch (err) {
         errorEl.textContent = 'Connection error. Check API URL.';
       }
@@ -177,15 +299,13 @@
       errorEl.textContent = '';
 
       try {
-        const res = await fetch(`${getApiUrl()}/auth/register`, {
+        const data = await api('/auth/register', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: usernameVal, password })
         });
-        const data = await res.json();
 
-        if (!res.ok) {
-          errorEl.textContent = data.error || 'Registration failed';
+        if (data.error) {
+          errorEl.textContent = data.error;
           return;
         }
 
@@ -193,9 +313,9 @@
         username = data.user.username;
         localStorage.setItem('token', token);
         localStorage.setItem('username', username);
-        showKeys();
+        showMain();
       } catch (err) {
-        errorEl.textContent = 'Connection error. Check API URL.';
+        errorEl.textContent = 'Connection error.';
       }
     }
 
@@ -207,48 +327,141 @@
       showAuth();
     }
 
+    async function loadProviders() {
+      try {
+        const data = await api('/providers');
+        providers = data.providers || [];
+        const options = '<option value="">Select provider...</option>' +
+          providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        document.getElementById('providerSelect').innerHTML = options;
+        document.getElementById('newKeyProvider').innerHTML = options;
+      } catch (err) {
+        console.error('Failed to load providers:', err);
+      }
+    }
+
+    async function onProviderChange() {
+      const provider = document.getElementById('providerSelect').value;
+      const modelSelect = document.getElementById('modelSelect');
+      modelSelect.innerHTML = '<option value="">Loading models...</option>';
+
+      if (!provider) {
+        modelSelect.innerHTML = '<option value="">Select model...</option>';
+        return;
+      }
+
+      try {
+        const data = await api(`/models?provider=${provider}`);
+        currentModels = data.models || [];
+        modelSelect.innerHTML = '<option value="">Select model...</option>' +
+          currentModels.map(m => `<option value="${m.id}">${m.name || m.id}</option>`).join('');
+      } catch (err) {
+        modelSelect.innerHTML = '<option value="">Failed to load models</option>';
+      }
+    }
+
+    function onModelChange() {}
+
+    async function sendMessage() {
+      const provider = document.getElementById('providerSelect').value;
+      const model = document.getElementById('modelSelect').value;
+      const prompt = document.getElementById('promptInput').value.trim();
+      const temperature = parseFloat(document.getElementById('temperature').value);
+      const maxTokens = parseInt(document.getElementById('maxTokens').value);
+
+      if (!provider || !model || !prompt) {
+        alert('Please select provider, model and enter a prompt');
+        return;
+      }
+
+      const sendBtn = document.getElementById('sendBtn');
+      const outputBox = document.getElementById('outputBox');
+      const outputStatus = document.getElementById('outputStatus');
+
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<span class="loading"></span>';
+      outputBox.textContent = 'Loading...';
+      outputStatus.textContent = '';
+
+      try {
+        const data = await api('/chat', {
+          method: 'POST',
+          body: JSON.stringify({
+            provider,
+            model,
+            messages: [{ role: 'user', content: prompt }],
+            temperature,
+            max_tokens: maxTokens
+          })
+        });
+
+        if (data.error) {
+          outputBox.textContent = `Error: ${JSON.stringify(data.error, null, 2)}`;
+          outputStatus.textContent = 'Error';
+          return;
+        }
+
+        const content = data.choices?.[0]?.message?.content || '';
+        outputBox.textContent = JSON.stringify(data, null, 2);
+        outputStatus.textContent = content ? 'Success' : 'No response';
+      } catch (err) {
+        outputBox.textContent = `Error: ${err.message}`;
+        outputStatus.textContent = 'Error';
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send';
+      }
+    }
+
+    function copyOutput() {
+      const output = document.getElementById('outputBox').textContent;
+      navigator.clipboard.writeText(output);
+    }
+
     async function loadKeys() {
       const listEl = document.getElementById('keysList');
 
       try {
-        const res = await fetch(`${getApiUrl()}/keys`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (res.status === 401 || res.status === 403) {
-          logout();
-          return;
-        }
-
-        const data = await res.json();
+        const data = await api('/keys');
         const keys = data.keys || {};
 
-        if (Object.keys(keys).length === 0) {
-          listEl.innerHTML = '<p style="color: #666; text-align: center;">No API keys saved yet.</p>';
+        const allKeys = [];
+        for (const [provider, providerKeys] of Object.entries(keys)) {
+          if (Array.isArray(providerKeys)) {
+            providerKeys.forEach((k, idx) => {
+              allKeys.push({ provider, ...k, idx });
+            });
+          }
+        }
+
+        if (allKeys.length === 0) {
+          listEl.innerHTML = '<div class="empty-state"><p>No API keys saved yet. Add your first key above.</p></div>';
           return;
         }
 
-        listEl.innerHTML = Object.entries(keys).map(([provider, maskedKey]) => `
+        listEl.innerHTML = allKeys.map(k => `
           <div class="key-item">
             <div class="key-info">
-              <div class="key-provider">${provider}</div>
-              <div class="key-value">${maskedKey}</div>
+              <div class="key-provider">${k.provider}</div>
+              <div class="key-name">${k.name}</div>
+              <div class="key-value">${k.key}</div>
             </div>
             <div class="key-actions">
-              <button class="btn-danger" onclick="deleteKey('${provider}')">Delete</button>
+              <button class="btn-small btn-danger" onclick="deleteKey('${k.provider}', ${k.idx})">Delete</button>
             </div>
           </div>
         `).join('');
       } catch (err) {
-        listEl.innerHTML = '<p style="color: #dc3545; text-align: center;">Failed to load keys</p>';
+        listEl.innerHTML = '<div class="error">Failed to load keys</div>';
       }
     }
 
-    async function saveKey() {
-      const provider = document.getElementById('provider').value.trim();
-      const apiKey = document.getElementById('apiKey').value.trim();
-      const errorEl = document.getElementById('saveError');
-      const successEl = document.getElementById('saveSuccess');
+    async function addKey() {
+      const provider = document.getElementById('newKeyProvider').value;
+      const name = document.getElementById('newKeyName').value.trim();
+      const apiKey = document.getElementById('newKeyValue').value.trim();
+      const errorEl = document.getElementById('addKeyError');
+      const successEl = document.getElementById('addKeySuccess');
       errorEl.textContent = '';
       successEl.textContent = '';
 
@@ -258,50 +471,38 @@
       }
 
       try {
-        const res = await fetch(`${getApiUrl()}/keys`, {
+        const data = await api('/keys', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ provider, apiKey })
+          body: JSON.stringify({ provider, name: name || `Key ${Date.now()}`, apiKey })
         });
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          errorEl.textContent = data.error || 'Failed to save key';
+        if (data.error) {
+          errorEl.textContent = data.error;
           return;
         }
 
         successEl.textContent = data.message;
-        document.getElementById('provider').value = '';
-        document.getElementById('apiKey').value = '';
+        document.getElementById('newKeyName').value = '';
+        document.getElementById('newKeyValue').value = '';
         loadKeys();
       } catch (err) {
-        errorEl.textContent = 'Connection error';
+        errorEl.textContent = 'Failed to add key';
       }
     }
 
-    async function deleteKey(provider) {
-      if (!confirm(`Delete ${provider} key?`)) return;
+    async function deleteKey(provider, idx) {
+      if (!confirm(`Delete this ${provider} key?`)) return;
 
       try {
-        const res = await fetch(`${getApiUrl()}/keys/${provider}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (res.ok) {
-          loadKeys();
-        }
+        await api(`/keys/${provider}/${idx}`, { method: 'DELETE' });
+        loadKeys();
       } catch (err) {
         alert('Failed to delete key');
       }
     }
 
     if (token) {
-      showKeys();
+      showMain();
     } else {
       showAuth();
     }
