@@ -4,92 +4,331 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Keys Manager</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; min-height: 100vh; }
-    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-    h1 { text-align: center; margin-bottom: 24px; color: #1a1a2e; }
-    h2 { margin-bottom: 16px; color: #333; font-size: 18px; }
-    h3 { margin-bottom: 12px; color: #444; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border: #334155;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      height: 100vh;
+      position: fixed;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .sidebar-header span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .nav-items {
+      padding: 16px 12px;
+      flex: 1;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+    .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent); color: white; }
+    .nav-item svg { width: 20px; height: 20px; }
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .api-url-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 12px;
+    }
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 24px;
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 1024px) { .grid-2 { grid-template-columns: 1fr; } }
     .form-group { margin-bottom: 16px; }
-    label { display: block; margin-bottom: 6px; color: #555; font-weight: 500; font-size: 14px; }
-    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-    textarea { resize: vertical; min-height: 100px; font-family: 'Monaco', 'Menlo', monospace; }
-
-    button { padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-    button:hover { background: #4f46e5; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    button.btn-secondary { background: #64748b; }
-    button.btn-secondary:hover { background: #475569; }
-    button.btn-danger { background: #ef4444; }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    textarea { resize: vertical; min-height: 120px; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; }
+    button {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.btn-secondary { background: var(--bg-tertiary); }
+    button.btn-secondary:hover { background: var(--border); }
+    button.btn-danger { background: var(--danger); }
     button.btn-danger:hover { background: #dc2626; }
     button.btn-small { padding: 6px 12px; font-size: 12px; }
-    button.btn-success { background: #22c55e; }
-    button.btn-success:hover { background: #16a34a; }
-
-    .error { color: #ef4444; font-size: 13px; margin-top: 6px; }
-    .success { color: #22c55e; font-size: 13px; margin-top: 6px; }
+    button.btn-icon { padding: 8px; border-radius: 6px; }
+    .error { color: var(--danger); font-size: 13px; margin-top: 6px; }
+    .success { color: var(--success); font-size: 13px; margin-top: 6px; }
     .hidden { display: none !important; }
-
-    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-    .tab { flex: 1; padding: 12px; text-align: center; background: #e2e8f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
-    .tab.active { background: #6366f1; color: white; }
-    .tab:hover:not(.active) { background: #cbd5e1; }
-
-    .nav-tabs { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 20px; }
-    .nav-tab { flex: 1; padding: 10px 16px; text-align: center; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; color: #64748b; transition: all 0.2s; }
-    .nav-tab.active { background: white; color: #6366f1; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
-    .key-item { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tab {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .tab:hover:not(.active) { background: var(--border); }
+    .key-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+    .key-item:hover { border-color: var(--accent); }
     .key-info { flex: 1; }
-    .key-provider { font-weight: 600; color: #333; text-transform: capitalize; }
-    .key-name { font-size: 13px; color: #6366f1; margin-top: 4px; }
-    .key-value { font-size: 12px; color: #64748b; margin-top: 4px; font-family: monospace; }
+    .key-provider {
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: capitalize;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .key-name { font-weight: 500; color: var(--text-primary); }
+    .key-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
     .key-actions { display: flex; gap: 8px; }
-
-    .chat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 768px) { .chat-grid { grid-template-columns: 1fr; } }
-
-    .output-box { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 10px; min-height: 200px; max-height: 400px; overflow-y: auto; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; white-space: pre-wrap; word-break: break-word; }
-    .output-box .error { color: #f38ba8; }
-    .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .output-header span { color: #888; font-size: 12px; }
-
-    .loading { display: inline-block; width: 20px; height: 20px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .output-box {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      min-height: 300px;
+      max-height: 500px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .output-box pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .output-status {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+    .output-status.success { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .output-status.error { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .chat-message {
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      max-width: 85%;
+    }
+    .chat-message.user {
+      background: var(--accent);
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-message.assistant {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-messages {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .param-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 100px;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .param-row label { margin-bottom: 0; color: var(--text-primary); }
+    .param-type {
+      font-size: 11px;
+      padding: 2px 6px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+    .param-required {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: rgba(239, 68, 68, 0.2);
+      border-radius: 4px;
+      color: var(--danger);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+    .empty-state svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; }
+    .loading {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .model-select { margin-bottom: 12px; }
-    .config-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    .api-url-bar { background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
-    .api-url-bar input { background: white; }
-
-    .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
-    .empty-state p { margin-bottom: 16px; }
+    .message-time { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+    .config-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main-content { margin-left: 0; }
+      .config-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>API Keys Manager</h1>
-
-    <div class="api-url-bar">
-      <div class="form-group" style="margin-bottom: 0;">
-        <label>Backend API URL</label>
-        <input type="text" id="apiUrl" value="https://clumsily-implant-threaten.ngrok-free.dev" placeholder="http://your-vps-ip:3000">
-      </div>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h1>API Keys Manager</h1>
+      <span id="version">v1.0.0</span>
     </div>
+    <nav class="nav-items">
+      <div class="nav-item active" data-tab="chat" onclick="switchTab('chat')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        <span>Chat</span>
+      </div>
+      <div class="nav-item" data-tab="request" onclick="switchTab('request')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+        <span>API Request</span>
+      </div>
+      <div class="nav-item" data-tab="keys" onclick="switchTab('keys')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+        <span>API Keys</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <input type="text" class="api-url-input" id="apiUrl" value="https://clumsily-implant-threaten.ngrok-free.dev" placeholder="Backend API URL">
+    </div>
+  </div>
 
+  <div class="main-content">
     <div id="authSection">
-      <div class="card">
+      <div class="card" style="max-width: 400px; margin: 60px auto;">
+        <h2 style="text-align: center; margin-bottom: 24px;">Welcome</h2>
         <div class="tabs">
-          <button class="tab active" data-tab="login">Login</button>
-          <button class="tab" data-tab="register">Register</button>
+          <div class="tab active" data-tab="login" onclick="switchAuthTab('login')">Login</div>
+          <div class="tab" data-tab="register" onclick="switchAuthTab('register')">Register</div>
         </div>
-
         <div id="loginForm">
           <div class="form-group">
             <label>Username</label>
@@ -99,10 +338,9 @@
             <label>Password</label>
             <input type="password" id="loginPassword" placeholder="Enter password">
           </div>
-          <button onclick="login()">Login</button>
+          <button onclick="login()" style="width: 100%;">Login</button>
           <div id="loginError" class="error"></div>
         </div>
-
         <div id="registerForm" class="hidden">
           <div class="form-group">
             <label>Username</label>
@@ -112,21 +350,18 @@
             <label>Password</label>
             <input type="password" id="registerPassword" placeholder="Choose password (min 6 chars)">
           </div>
-          <button onclick="register()">Register</button>
+          <button onclick="register()" style="width: 100%;">Register</button>
           <div id="registerError" class="error"></div>
         </div>
       </div>
     </div>
 
     <div id="mainSection" class="hidden">
-      <div class="nav-tabs">
-        <button class="nav-tab active" data-tab="chat">Chat</button>
-        <button class="nav-tab" data-tab="keys">API Keys</button>
-      </div>
-
       <div id="chatTab">
         <div class="card">
-          <h3>Configuration</h3>
+          <div class="card-header">
+            <h3 class="card-title">Configuration</h3>
+          </div>
           <div class="config-row">
             <div class="form-group">
               <label>Provider</label>
@@ -135,8 +370,14 @@
               </select>
             </div>
             <div class="form-group">
+              <label>API Key</label>
+              <select id="keySelect">
+                <option value="">Select key...</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label>Model</label>
-              <select id="modelSelect" onchange="onModelChange()">
+              <select id="modelSelect">
                 <option value="">Select model...</option>
               </select>
             </div>
@@ -152,30 +393,76 @@
             </div>
           </div>
         </div>
-
-        <div class="chat-grid">
+        <div class="grid-2">
           <div class="card">
-            <h3>Input</h3>
+            <h3 class="card-title" style="margin-bottom: 16px;">Messages</h3>
+            <div id="chatMessages" class="chat-messages"></div>
             <div class="form-group">
-              <textarea id="promptInput" placeholder="Enter your prompt here..."></textarea>
+              <textarea id="promptInput" placeholder="Enter your message..."></textarea>
             </div>
-            <button id="sendBtn" onclick="sendMessage()">Send</button>
+            <div style="display: flex; gap: 12px;">
+              <button id="sendBtn" onclick="sendMessage()">Send Message</button>
+              <button class="btn-secondary" onclick="clearChat()">Clear</button>
+            </div>
           </div>
-
           <div class="card">
             <div class="output-header">
-              <h3>Output</h3>
-              <span id="outputStatus"></span>
-              <button class="btn-small btn-secondary" onclick="copyOutput()">Copy</button>
+              <h3 class="card-title">Response</h3>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span id="outputStatus" class="output-status">Ready</span>
+                <button class="btn-icon btn-secondary" onclick="copyOutput()" title="Copy">📋</button>
+              </div>
             </div>
-            <div id="outputBox" class="output-box">Response will appear here...</div>
+            <div id="outputBox" class="output-box"><pre style="color: var(--text-muted);">Response will appear here...</pre></div>
           </div>
+        </div>
+      </div>
+
+      <div id="requestTab" class="hidden">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">API Request Builder</h3>
+          </div>
+          <div class="config-row">
+            <div class="form-group">
+              <label>Provider</label>
+              <select id="reqProviderSelect" onchange="onReqProviderChange()">
+                <option value="">Select provider...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>API Key</label>
+              <select id="reqKeySelect">
+                <option value="">Select key...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Endpoint</label>
+              <select id="endpointSelect" onchange="onEndpointChange()">
+                <option value="">Select endpoint...</option>
+              </select>
+            </div>
+          </div>
+          <div id="paramsContainer"></div>
+          <button id="reqSendBtn" onclick="sendRequest()">Send Request</button>
+        </div>
+        <div class="card">
+          <div class="output-header">
+            <h3 class="card-title">Response</h3>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span id="reqOutputStatus" class="output-status">Ready</span>
+              <button class="btn-icon btn-secondary" onclick="copyOutput()">📋</button>
+            </div>
+          </div>
+          <div id="reqOutputBox" class="output-box"><pre style="color: var(--text-muted);">Response will appear here...</pre></div>
         </div>
       </div>
 
       <div id="keysTab" class="hidden">
         <div class="card">
-          <h3>Add New API Key</h3>
+          <div class="card-header">
+            <h3 class="card-title">Add New API Key</h3>
+          </div>
           <div class="config-row">
             <div class="form-group">
               <label>Provider</label>
@@ -185,7 +472,7 @@
             </div>
             <div class="form-group">
               <label>Key Name</label>
-              <input type="text" id="newKeyName" placeholder="e.g., Production Key 1">
+              <input type="text" id="newKeyName" placeholder="e.g., Production Key">
             </div>
           </div>
           <div class="form-group">
@@ -196,13 +483,11 @@
           <div id="addKeyError" class="error"></div>
           <div id="addKeySuccess" class="success"></div>
         </div>
-
         <div class="card">
-          <h3>Your API Keys</h3>
+          <h3 class="card-title" style="margin-bottom: 20px;">Your API Keys</h3>
           <div id="keysList"></div>
         </div>
-
-        <button onclick="logout()" class="btn-danger" style="width: 100%; margin-top: 16px;">Logout</button>
+        <button onclick="logout()" class="btn-danger" style="width: 100%;">Logout</button>
       </div>
     </div>
   </div>
@@ -212,29 +497,21 @@
     let username = localStorage.getItem('username');
     let providers = [];
     let currentModels = [];
+    let chatHistory = [];
 
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const tabName = tab.dataset.tab;
-        document.getElementById('loginForm').classList.toggle('hidden', tabName !== 'login');
-        document.getElementById('registerForm').classList.toggle('hidden', tabName !== 'register');
-      });
-    });
+    function switchTab(tab) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
+      document.getElementById('chatTab').classList.toggle('hidden', tab !== 'chat');
+      document.getElementById('requestTab').classList.toggle('hidden', tab !== 'request');
+      document.getElementById('keysTab').classList.toggle('hidden', tab !== 'keys');
+    }
 
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const tabName = tab.dataset.tab;
-        document.getElementById('chatTab').classList.toggle('hidden', tabName !== 'chat');
-        document.getElementById('keysTab').classList.toggle('hidden', tabName !== 'keys');
-      });
-    });
-
-    function getApiUrl() {
-      return document.getElementById('apiUrl').value.replace(/\/$/, '');
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tabs .tab[data-tab="${tab}"]`).classList.add('active');
+      document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
     }
 
     async function api(endpoint, options = {}) {
@@ -251,6 +528,10 @@
         throw new Error('Session expired');
       }
       return res.json();
+    }
+
+    function getApiUrl() {
+      return document.getElementById('apiUrl').value.replace(/\/$/, '');
     }
 
     function showAuth() {
@@ -270,26 +551,18 @@
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
       errorEl.textContent = '';
-
       try {
         const data = await api('/auth/login', {
           method: 'POST',
           body: JSON.stringify({ username: usernameVal, password })
         });
-
-        if (data.error) {
-          errorEl.textContent = data.error;
-          return;
-        }
-
+        if (data.error) { errorEl.textContent = data.error; return; }
         token = data.token;
         username = data.user.username;
         localStorage.setItem('token', token);
         localStorage.setItem('username', username);
         showMain();
-      } catch (err) {
-        errorEl.textContent = 'Connection error. Check API URL.';
-      }
+      } catch (err) { errorEl.textContent = 'Connection error.'; }
     }
 
     async function register() {
@@ -297,26 +570,18 @@
       const password = document.getElementById('registerPassword').value;
       const errorEl = document.getElementById('registerError');
       errorEl.textContent = '';
-
       try {
         const data = await api('/auth/register', {
           method: 'POST',
           body: JSON.stringify({ username: usernameVal, password })
         });
-
-        if (data.error) {
-          errorEl.textContent = data.error;
-          return;
-        }
-
+        if (data.error) { errorEl.textContent = data.error; return; }
         token = data.token;
         username = data.user.username;
         localStorage.setItem('token', token);
         localStorage.setItem('username', username);
         showMain();
-      } catch (err) {
-        errorEl.textContent = 'Connection error.';
-      }
+      } catch (err) { errorEl.textContent = 'Connection error.'; }
     }
 
     function logout() {
@@ -324,6 +589,7 @@
       localStorage.removeItem('username');
       token = null;
       username = null;
+      chatHistory = [];
       showAuth();
     }
 
@@ -331,100 +597,18 @@
       try {
         const data = await api('/providers');
         providers = data.providers || [];
-        const options = '<option value="">Select provider...</option>' +
-          providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-        document.getElementById('providerSelect').innerHTML = options;
-        document.getElementById('newKeyProvider').innerHTML = options;
-      } catch (err) {
-        console.error('Failed to load providers:', err);
-      }
-    }
-
-    async function onProviderChange() {
-      const provider = document.getElementById('providerSelect').value;
-      const modelSelect = document.getElementById('modelSelect');
-      modelSelect.innerHTML = '<option value="">Loading models...</option>';
-
-      if (!provider) {
-        modelSelect.innerHTML = '<option value="">Select model...</option>';
-        return;
-      }
-
-      try {
-        const data = await api(`/models?provider=${provider}`);
-        currentModels = data.models || [];
-        modelSelect.innerHTML = '<option value="">Select model...</option>' +
-          currentModels.map(m => `<option value="${m.id}">${m.name || m.id}</option>`).join('');
-      } catch (err) {
-        modelSelect.innerHTML = '<option value="">Failed to load models</option>';
-      }
-    }
-
-    function onModelChange() {}
-
-    async function sendMessage() {
-      const provider = document.getElementById('providerSelect').value;
-      const model = document.getElementById('modelSelect').value;
-      const prompt = document.getElementById('promptInput').value.trim();
-      const temperature = parseFloat(document.getElementById('temperature').value);
-      const maxTokens = parseInt(document.getElementById('maxTokens').value);
-
-      if (!provider || !model || !prompt) {
-        alert('Please select provider, model and enter a prompt');
-        return;
-      }
-
-      const sendBtn = document.getElementById('sendBtn');
-      const outputBox = document.getElementById('outputBox');
-      const outputStatus = document.getElementById('outputStatus');
-
-      sendBtn.disabled = true;
-      sendBtn.innerHTML = '<span class="loading"></span>';
-      outputBox.textContent = 'Loading...';
-      outputStatus.textContent = '';
-
-      try {
-        const data = await api('/chat', {
-          method: 'POST',
-          body: JSON.stringify({
-            provider,
-            model,
-            messages: [{ role: 'user', content: prompt }],
-            temperature,
-            max_tokens: maxTokens
-          })
-        });
-
-        if (data.error) {
-          outputBox.textContent = `Error: ${JSON.stringify(data.error, null, 2)}`;
-          outputStatus.textContent = 'Error';
-          return;
-        }
-
-        const content = data.choices?.[0]?.message?.content || '';
-        outputBox.textContent = JSON.stringify(data, null, 2);
-        outputStatus.textContent = content ? 'Success' : 'No response';
-      } catch (err) {
-        outputBox.textContent = `Error: ${err.message}`;
-        outputStatus.textContent = 'Error';
-      } finally {
-        sendBtn.disabled = false;
-        sendBtn.textContent = 'Send';
-      }
-    }
-
-    function copyOutput() {
-      const output = document.getElementById('outputBox').textContent;
-      navigator.clipboard.writeText(output);
+        const options = providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        document.getElementById('providerSelect').innerHTML = '<option value="">Select provider...</option>' + options;
+        document.getElementById('reqProviderSelect').innerHTML = '<option value="">Select provider...</option>' + options;
+        document.getElementById('newKeyProvider').innerHTML = '<option value="">Select provider...</option>' + options;
+      } catch (err) { console.error('Failed to load providers:', err); }
     }
 
     async function loadKeys() {
       const listEl = document.getElementById('keysList');
-
       try {
         const data = await api('/keys');
         const keys = data.keys || {};
-
         const allKeys = [];
         for (const [provider, providerKeys] of Object.entries(keys)) {
           if (Array.isArray(providerKeys)) {
@@ -433,26 +617,214 @@
             });
           }
         }
-
         if (allKeys.length === 0) {
           listEl.innerHTML = '<div class="empty-state"><p>No API keys saved yet. Add your first key above.</p></div>';
           return;
         }
-
         listEl.innerHTML = allKeys.map(k => `
           <div class="key-item">
             <div class="key-info">
               <div class="key-provider">${k.provider}</div>
               <div class="key-name">${k.name}</div>
-              <div class="key-value">${k.key}</div>
+              <div class="key-meta">${k.key} • ${new Date(k.createdAt).toLocaleDateString()}</div>
             </div>
             <div class="key-actions">
               <button class="btn-small btn-danger" onclick="deleteKey('${k.provider}', ${k.idx})">Delete</button>
             </div>
           </div>
         `).join('');
+        updateKeySelects(keys);
+      } catch (err) { listEl.innerHTML = '<div class="error">Failed to load keys</div>'; }
+    }
+
+    function updateKeySelects(keys) {
+      const provider = document.getElementById('providerSelect').value;
+      const reqProvider = document.getElementById('reqProviderSelect').value;
+      const keyOptions = keys[provider] || [];
+      const reqKeyOptions = keys[reqProvider] || [];
+      document.getElementById('keySelect').innerHTML = '<option value="">Select key...</option>' +
+        keyOptions.map((k, i) => `<option value="${i}">${k.name}</option>`).join('');
+      document.getElementById('reqKeySelect').innerHTML = '<option value="">Select key...</option>' +
+        reqKeyOptions.map((k, i) => `<option value="${i}">${k.name}</option>`).join('');
+    }
+
+    async function onProviderChange() {
+      const provider = document.getElementById('providerSelect').value;
+      const modelSelect = document.getElementById('modelSelect');
+      modelSelect.innerHTML = '<option value="">Loading models...</option>';
+      if (!provider) {
+        modelSelect.innerHTML = '<option value="">Select model...</option>';
+        return;
+      }
+      const providerKeys = providers.find(p => p.id === provider);
+      if (providerKeys) {
+        modelSelect.innerHTML = '<option value="">Select model...</option>';
+      }
+      try {
+        const data = await api(`/models?provider=${provider}`);
+        currentModels = data.models || [];
+        modelSelect.innerHTML = '<option value="">Select model...</option>' +
+          currentModels.map(m => `<option value="${m.id}">${m.name || m.id}</option>`).join('');
+      } catch (err) { modelSelect.innerHTML = '<option value="">Failed to load</option>'; }
+    }
+
+    async function onReqProviderChange() {
+      const provider = document.getElementById('reqProviderSelect').value;
+      const endpointSelect = document.getElementById('endpointSelect');
+      endpointSelect.innerHTML = '<option value="">Loading...</option>';
+      if (!provider) {
+        endpointSelect.innerHTML = '<option value="">Select endpoint...</option>';
+        document.getElementById('paramsContainer').innerHTML = '';
+        return;
+      }
+      const p = providers.find(pr => pr.id === provider);
+      if (p) {
+        endpointSelect.innerHTML = '<option value="">Select endpoint...</option>' +
+          p.endpoints.map(e => `<option value="${e.id}">${e.method} ${e.name}</option>`).join('');
+      }
+      document.getElementById('paramsContainer').innerHTML = '';
+    }
+
+    function onEndpointChange() {
+      const provider = document.getElementById('reqProviderSelect').value;
+      const endpointId = document.getElementById('endpointSelect').value;
+      const container = document.getElementById('paramsContainer');
+      if (!provider || !endpointId) { container.innerHTML = ''; return; }
+      const p = providers.find(pr => pr.id === provider);
+      const endpoint = p?.endpoints.find(e => e.id === endpointId);
+      if (!endpoint) return;
+      container.innerHTML = '<h4 style="margin: 16px 0 12px; color: var(--text-secondary);">Parameters</h4>' +
+        endpoint.params.map(param => `
+          <div class="param-row">
+            <div>
+              <label>${param.name}</label>
+              <span class="param-type">${param.type}</span>
+              ${param.required ? '<span class="param-required">required</span>' : ''}
+            </div>
+            <input type="${param.type === 'number' ? 'number' : 'text'}"
+                   id="param_${param.name}"
+                   placeholder="${param.default !== undefined ? 'Default: ' + param.default : ''}"
+                   ${param.min !== undefined ? `min="${param.min}"` : ''}
+                   ${param.max !== undefined ? `max="${param.max}"` : ''}
+                   step="${param.type === 'number' ? 'any' : ''}">
+          </div>
+        `).join('');
+    }
+
+    async function sendMessage() {
+      const provider = document.getElementById('providerSelect').value;
+      const model = document.getElementById('modelSelect').value;
+      const prompt = document.getElementById('promptInput').value.trim();
+      const temperature = parseFloat(document.getElementById('temperature').value);
+      const maxTokens = parseInt(document.getElementById('maxTokens').value);
+      const keyIndex = document.getElementById('keySelect').value;
+      if (!provider || !model || !prompt) { alert('Please select provider, model and enter message'); return; }
+      const sendBtn = document.getElementById('sendBtn');
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<span class="loading"></span>';
+      const outputBox = document.getElementById('outputBox');
+      const statusEl = document.getElementById('outputStatus');
+      statusEl.textContent = 'Loading...';
+      statusEl.className = 'output-status';
+      outputBox.innerHTML = '<pre style="color: var(--text-muted);">Loading...</pre>';
+      chatHistory.push({ role: 'user', content: prompt });
+      renderChat();
+      try {
+        const data = await api('/chat', {
+          method: 'POST',
+          body: JSON.stringify({ provider, model, messages: chatHistory, temperature, max_tokens: maxTokens, keyIndex: keyIndex ? parseInt(keyIndex) : undefined })
+        });
+        if (data.error) {
+          outputBox.innerHTML = `<pre style="color: var(--danger);">${JSON.stringify(data.error, null, 2)}</pre>`;
+          statusEl.textContent = 'Error';
+          statusEl.className = 'output-status error';
+          return;
+        }
+        const content = data.choices?.[0]?.message?.content || '';
+        if (content) {
+          chatHistory.push({ role: 'assistant', content });
+          renderChat();
+        }
+        outputBox.innerHTML = `<pre><code class="language-json">${JSON.stringify(data, null, 2)}</code></pre>`;
+        hljs.highlightElement(outputBox.querySelector('code'));
+        statusEl.textContent = 'Success';
+        statusEl.className = 'output-status success';
       } catch (err) {
-        listEl.innerHTML = '<div class="error">Failed to load keys</div>';
+        outputBox.innerHTML = `<pre style="color: var(--danger);">Error: ${err.message}</pre>`;
+        statusEl.textContent = 'Error';
+        statusEl.className = 'output-status error';
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send Message';
+        document.getElementById('promptInput').value = '';
+      }
+    }
+
+    function renderChat() {
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = chatHistory.map(m => `
+        <div class="chat-message ${m.role}">
+          <div>${m.content}</div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function clearChat() {
+      chatHistory = [];
+      renderChat();
+      document.getElementById('outputBox').innerHTML = '<pre style="color: var(--text-muted);">Response will appear here...</pre>';
+      document.getElementById('outputStatus').textContent = 'Ready';
+      document.getElementById('outputStatus').className = 'output-status';
+    }
+
+    async function sendRequest() {
+      const provider = document.getElementById('reqProviderSelect').value;
+      const endpoint = document.getElementById('endpointSelect').value;
+      const keyIndex = document.getElementById('reqKeySelect').value;
+      if (!provider || !endpoint) { alert('Please select provider and endpoint'); return; }
+      const p = providers.find(pr => pr.id === provider);
+      const ep = p?.endpoints.find(e => e.id === endpoint);
+      if (!ep) return;
+      const params = {};
+      ep.params.forEach(param => {
+        const input = document.getElementById(`param_${param.name}`);
+        if (input && input.value) {
+          let val = input.value;
+          if (param.type === 'number') val = parseFloat(val);
+          params[param.name] = val;
+        }
+      });
+      const sendBtn = document.getElementById('reqSendBtn');
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<span class="loading"></span>';
+      const outputBox = document.getElementById('reqOutputBox');
+      const statusEl = document.getElementById('reqOutputStatus');
+      statusEl.textContent = 'Loading...';
+      statusEl.className = 'output-status';
+      outputBox.innerHTML = '<pre style="color: var(--text-muted);">Loading...</pre>';
+      try {
+        const data = await api('/request', {
+          method: 'POST',
+          body: JSON.stringify({ provider, endpoint, params, keyIndex: keyIndex ? parseInt(keyIndex) : undefined })
+        });
+        if (data.error) {
+          outputBox.innerHTML = `<pre style="color: var(--danger);">${JSON.stringify(data.error, null, 2)}</pre>`;
+          statusEl.textContent = 'Error';
+          statusEl.className = 'output-status error';
+          return;
+        }
+        outputBox.innerHTML = `<pre><code class="language-json">${JSON.stringify(data, null, 2)}</code></pre>`;
+        hljs.highlightElement(outputBox.querySelector('code'));
+        statusEl.textContent = 'Success';
+        statusEl.className = 'output-status success';
+      } catch (err) {
+        outputBox.innerHTML = `<pre style="color: var(--danger);">Error: ${err.message}</pre>`;
+        statusEl.textContent = 'Error';
+        statusEl.className = 'output-status error';
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send Request';
       }
     }
 
@@ -464,48 +836,35 @@
       const successEl = document.getElementById('addKeySuccess');
       errorEl.textContent = '';
       successEl.textContent = '';
-
-      if (!provider || !apiKey) {
-        errorEl.textContent = 'Provider and API key required';
-        return;
-      }
-
+      if (!provider || !apiKey) { errorEl.textContent = 'Provider and API key required'; return; }
       try {
         const data = await api('/keys', {
           method: 'POST',
           body: JSON.stringify({ provider, name: name || `Key ${Date.now()}`, apiKey })
         });
-
-        if (data.error) {
-          errorEl.textContent = data.error;
-          return;
-        }
-
+        if (data.error) { errorEl.textContent = data.error; return; }
         successEl.textContent = data.message;
         document.getElementById('newKeyName').value = '';
         document.getElementById('newKeyValue').value = '';
         loadKeys();
-      } catch (err) {
-        errorEl.textContent = 'Failed to add key';
-      }
+      } catch (err) { errorEl.textContent = 'Failed to add key'; }
     }
 
     async function deleteKey(provider, idx) {
       if (!confirm(`Delete this ${provider} key?`)) return;
-
       try {
         await api(`/keys/${provider}/${idx}`, { method: 'DELETE' });
         loadKeys();
-      } catch (err) {
-        alert('Failed to delete key');
-      }
+      } catch (err) { alert('Failed to delete key'); }
     }
 
-    if (token) {
-      showMain();
-    } else {
-      showAuth();
+    function copyOutput() {
+      const output = document.querySelector('.output-box pre')?.textContent || '';
+      navigator.clipboard.writeText(output);
     }
+
+    if (token) showMain();
+    else showAuth();
   </script>
 </body>
 </html>
