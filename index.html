@@ -392,17 +392,6 @@
   </div>
 
     <div class="main-content">
-    <div id="mainSection">
-      <div class="header-bar">
-        <div class="header-user">
-          <span class="header-username" id="headerUsername">User</span>
-        </div>
-        <div class="header-actions">
-          <button class="btn-small btn-secondary" onclick="showProfile()">Profile</button>
-          <button class="btn-small btn-danger" onclick="logout()">Logout</button>
-        </div>
-      </div>
-
       <div id="authSection">
         <div class="card" style="max-width: 400px; margin: 60px auto;">
           <h2 style="text-align: center; margin-bottom: 24px;">Welcome</h2>
@@ -437,169 +426,181 @@
         </div>
       </div>
 
-      <div id="chatTab">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Configuration</h3>
+      <div id="mainSection" class="hidden">
+        <div class="header-bar">
+          <div class="header-user">
+            <span class="header-username" id="headerUsername">User</span>
           </div>
-          <div class="config-row">
-            <div class="form-group">
-              <label>Provider</label>
-              <select id="providerSelect" onchange="onProviderChange()">
-                <option value="">Select provider...</option>
-              </select>
+          <div class="header-actions">
+            <button class="btn-small btn-secondary" onclick="showProfile()">Profile</button>
+            <button class="btn-small btn-danger" onclick="logout()">Logout</button>
+          </div>
+        </div>
+
+        <div id="chatTab">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Configuration</h3>
             </div>
-            <div class="form-group">
-              <label>API Key</label>
-              <select id="keySelect">
-                <option value="">Select key...</option>
-              </select>
+            <div class="config-row">
+              <div class="form-group">
+                <label>Provider</label>
+                <select id="providerSelect" onchange="onProviderChange()">
+                  <option value="">Select provider...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>API Key</label>
+                <select id="keySelect">
+                  <option value="">Select key...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Model</label>
+                <select id="modelSelect">
+                  <option value="">Select model...</option>
+                </select>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Model</label>
-              <select id="modelSelect">
-                <option value="">Select model...</option>
-              </select>
+            <div class="config-row">
+              <div class="form-group">
+                <label>Temperature</label>
+                <input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
+              </div>
+              <div class="form-group">
+                <label>Max Tokens</label>
+                <input type="number" id="maxTokens" value="2048" min="1" max="32000">
+              </div>
             </div>
           </div>
-          <div class="config-row">
-            <div class="form-group">
-              <label>Temperature</label>
-              <input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
+          <div class="grid-2">
+            <div class="card">
+              <h3 class="card-title" style="margin-bottom: 16px;">Messages</h3>
+              <div id="chatMessages" class="chat-messages"></div>
+              <div class="form-group">
+                <textarea id="promptInput" placeholder="Enter your message..."></textarea>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <button id="sendBtn" onclick="sendMessage()">Send Message</button>
+                <button class="btn-secondary" onclick="clearChat()">Clear</button>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Max Tokens</label>
-              <input type="number" id="maxTokens" value="2048" min="1" max="32000">
+            <div class="card">
+              <div class="output-header">
+                <h3 class="card-title">Response</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span id="outputStatus" class="output-status">Ready</span>
+                  <button class="btn-icon btn-secondary" onclick="copyOutput()" title="Copy">📋</button>
+                </div>
+              </div>
+              <div id="outputBox" class="output-box"><pre style="color: var(--text-muted);">Response will appear here...</pre></div>
             </div>
           </div>
         </div>
-        <div class="grid-2">
+
+        <div id="requestTab" class="hidden">
           <div class="card">
-            <h3 class="card-title" style="margin-bottom: 16px;">Messages</h3>
-            <div id="chatMessages" class="chat-messages"></div>
-            <div class="form-group">
-              <textarea id="promptInput" placeholder="Enter your message..."></textarea>
+            <div class="card-header">
+              <h3 class="card-title">API Request Builder</h3>
             </div>
-            <div style="display: flex; gap: 12px;">
-              <button id="sendBtn" onclick="sendMessage()">Send Message</button>
-              <button class="btn-secondary" onclick="clearChat()">Clear</button>
+            <div class="config-row">
+              <div class="form-group">
+                <label>Provider</label>
+                <select id="reqProviderSelect" onchange="onReqProviderChange()">
+                  <option value="">Select provider...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>API Key</label>
+                <select id="reqKeySelect">
+                  <option value="">Select key...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Endpoint</label>
+                <select id="endpointSelect" onchange="onEndpointChange()">
+                  <option value="">Select endpoint...</option>
+                </select>
+              </div>
             </div>
+            <div id="paramsContainer"></div>
+            <button id="reqSendBtn" onclick="sendRequest()">Send Request</button>
           </div>
           <div class="card">
             <div class="output-header">
               <h3 class="card-title">Response</h3>
               <div style="display: flex; gap: 8px; align-items: center;">
-                <span id="outputStatus" class="output-status">Ready</span>
-                <button class="btn-icon btn-secondary" onclick="copyOutput()" title="Copy">📋</button>
+                <span id="reqOutputStatus" class="output-status">Ready</span>
+                <button class="btn-icon btn-secondary" onclick="copyOutput()">📋</button>
               </div>
             </div>
-            <div id="outputBox" class="output-box"><pre style="color: var(--text-muted);">Response will appear here...</pre></div>
+            <div id="reqOutputBox" class="output-box"><pre style="color: var(--text-muted);">Response will appear here...</pre></div>
           </div>
         </div>
-      </div>
 
-      <div id="requestTab" class="hidden">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">API Request Builder</h3>
-          </div>
-          <div class="config-row">
-            <div class="form-group">
-              <label>Provider</label>
-              <select id="reqProviderSelect" onchange="onReqProviderChange()">
-                <option value="">Select provider...</option>
-              </select>
+        <div id="keysTab" class="hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Add New API Key</h3>
+            </div>
+            <div class="config-row">
+              <div class="form-group">
+                <label>Provider</label>
+                <select id="newKeyProvider">
+                  <option value="">Select provider...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Key Name</label>
+                <input type="text" id="newKeyName" placeholder="e.g., Production Key">
+              </div>
             </div>
             <div class="form-group">
               <label>API Key</label>
-              <select id="reqKeySelect">
-                <option value="">Select key...</option>
-              </select>
+              <input type="password" id="newKeyValue" placeholder="Enter your API key">
             </div>
-            <div class="form-group">
-              <label>Endpoint</label>
-              <select id="endpointSelect" onchange="onEndpointChange()">
-                <option value="">Select endpoint...</option>
-              </select>
-            </div>
+            <button onclick="addKey()">Add Key</button>
+            <div id="addKeyError" class="error"></div>
+            <div id="addKeySuccess" class="success"></div>
           </div>
-          <div id="paramsContainer"></div>
-          <button id="reqSendBtn" onclick="sendRequest()">Send Request</button>
-        </div>
-        <div class="card">
-          <div class="output-header">
-            <h3 class="card-title">Response</h3>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <span id="reqOutputStatus" class="output-status">Ready</span>
-              <button class="btn-icon btn-secondary" onclick="copyOutput()">📋</button>
-            </div>
+          <div class="card">
+            <h3 class="card-title" style="margin-bottom: 20px;">Your API Keys</h3>
+            <div id="keysList"></div>
           </div>
-          <div id="reqOutputBox" class="output-box"><pre style="color: var(--text-muted);">Response will appear here...</pre></div>
         </div>
       </div>
 
-      <div id="keysTab" class="hidden">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Add New API Key</h3>
+      <div id="profileModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeProfile()"></div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Profile Settings</h3>
+            <button class="btn-icon btn-secondary" onclick="closeProfile()">×</button>
           </div>
-          <div class="config-row">
+          <div class="modal-body">
             <div class="form-group">
-              <label>Provider</label>
-              <select id="newKeyProvider">
-                <option value="">Select provider...</option>
-              </select>
+              <label>Username</label>
+              <input type="text" id="profileUsername" disabled>
             </div>
             <div class="form-group">
-              <label>Key Name</label>
-              <input type="text" id="newKeyName" placeholder="e.g., Production Key">
+              <label>Current Password</label>
+              <input type="password" id="profileCurrentPassword" placeholder="Enter current password">
             </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="profileNewPassword" placeholder="Enter new password (min 6 chars)">
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="profileConfirmPassword" placeholder="Confirm new password">
+            </div>
+            <div id="profileError" class="error"></div>
+            <div id="profileSuccess" class="success"></div>
           </div>
-          <div class="form-group">
-            <label>API Key</label>
-            <input type="password" id="newKeyValue" placeholder="Enter your API key">
+          <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeProfile()">Cancel</button>
+            <button onclick="updateProfile()">Update Password</button>
           </div>
-          <button onclick="addKey()">Add Key</button>
-          <div id="addKeyError" class="error"></div>
-          <div id="addKeySuccess" class="success"></div>
-        </div>
-        <div class="card">
-          <h3 class="card-title" style="margin-bottom: 20px;">Your API Keys</h3>
-          <div id="keysList"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="profileModal" class="modal hidden">
-      <div class="modal-overlay" onclick="closeProfile()"></div>
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Profile Settings</h3>
-          <button class="btn-icon btn-secondary" onclick="closeProfile()">×</button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Username</label>
-            <input type="text" id="profileUsername" disabled>
-          </div>
-          <div class="form-group">
-            <label>Current Password</label>
-            <input type="password" id="profileCurrentPassword" placeholder="Enter current password">
-          </div>
-          <div class="form-group">
-            <label>New Password</label>
-            <input type="password" id="profileNewPassword" placeholder="Enter new password (min 6 chars)">
-          </div>
-          <div class="form-group">
-            <label>Confirm New Password</label>
-            <input type="password" id="profileConfirmPassword" placeholder="Confirm new password">
-          </div>
-          <div id="profileError" class="error"></div>
-          <div id="profileSuccess" class="success"></div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" onclick="closeProfile()">Cancel</button>
-          <button onclick="updateProfile()">Update Password</button>
         </div>
       </div>
     </div>
