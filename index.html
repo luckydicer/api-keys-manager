@@ -769,14 +769,24 @@
     }
 
     async function loadProviders() {
+      const defaultProviders = [
+        { id: 'openrouter', name: 'OpenRouter', endpoints: [{ id: 'chat', name: 'Chat Completions', method: 'POST', params: [] }, { id: 'models', name: 'List Models', method: 'GET', params: [] }] },
+        { id: 'chutes', name: 'Chutes', endpoints: [{ id: 'chat', name: 'Chat Completions', method: 'POST', params: [] }, { id: 'models', name: 'List Models', method: 'GET', params: [] }] }
+      ];
       try {
         const data = await api('/providers');
-        providers = data.providers || [];
-        const options = providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-        document.getElementById('providerSelect').innerHTML = '<option value="">Select provider...</option>' + options;
-        document.getElementById('reqProviderSelect').innerHTML = '<option value="">Select provider...</option>' + options;
-        document.getElementById('newKeyProvider').innerHTML = '<option value="">Select provider...</option>' + options;
-      } catch (err) { console.error('Failed to load providers:', err); }
+        providers = data.providers || defaultProviders;
+      } catch (err) {
+        console.error('Failed to load providers from API:', err);
+        providers = defaultProviders;
+      }
+      const options = providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      const providerSelect = document.getElementById('providerSelect');
+      const reqProviderSelect = document.getElementById('reqProviderSelect');
+      const newKeyProvider = document.getElementById('newKeyProvider');
+      if (providerSelect) providerSelect.innerHTML = '<option value="">Select provider...</option>' + options;
+      if (reqProviderSelect) reqProviderSelect.innerHTML = '<option value="">Select provider...</option>' + options;
+      if (newKeyProvider) newKeyProvider.innerHTML = '<option value="">Select provider...</option>' + options;
     }
 
     async function loadKeys() {
