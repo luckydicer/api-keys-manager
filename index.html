@@ -312,6 +312,53 @@
       display: flex;
       gap: 8px;
     }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+    }
+    .modal-content {
+      position: relative;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      z-index: 1;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .modal-body {
+      margin-bottom: 20px;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .main-content { margin-left: 0; }
@@ -522,7 +569,40 @@
         </div>
       </div>
     </div>
-  </div>
+
+    <div id="profileModal" class="modal hidden">
+      <div class="modal-overlay" onclick="closeProfile()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Profile Settings</h3>
+          <button class="btn-icon btn-secondary" onclick="closeProfile()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="profileUsername" disabled>
+          </div>
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="profileCurrentPassword" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="profileNewPassword" placeholder="Enter new password (min 6 chars)">
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="profileConfirmPassword" placeholder="Confirm new password">
+          </div>
+          <div id="profileError" class="error"></div>
+          <div id="profileSuccess" class="success"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeProfile()">Cancel</button>
+          <button onclick="updateProfile()">Update Password</button>
+        </div>
+      </div>
+    </div>
 
   <script>
     let token = localStorage.getItem('token');
@@ -580,7 +660,59 @@
     }
 
     function showProfile() {
-      alert('Profile settings coming soon');
+      document.getElementById('profileUsername').value = username || '';
+      document.getElementById('profileCurrentPassword').value = '';
+      document.getElementById('profileNewPassword').value = '';
+      document.getElementById('profileConfirmPassword').value = '';
+      document.getElementById('profileError').textContent = '';
+      document.getElementById('profileSuccess').textContent = '';
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeProfile() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    async function updateProfile() {
+      const currentPassword = document.getElementById('profileCurrentPassword').value;
+      const newPassword = document.getElementById('profileNewPassword').value;
+      const confirmPassword = document.getElementById('profileConfirmPassword').value;
+      const errorEl = document.getElementById('profileError');
+      const successEl = document.getElementById('profileSuccess');
+      errorEl.textContent = '';
+      successEl.textContent = '';
+
+      if (!currentPassword || !newPassword) {
+        errorEl.textContent = 'Current and new password are required';
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        errorEl.textContent = 'New password must be at least 6 characters';
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        errorEl.textContent = 'New passwords do not match';
+        return;
+      }
+
+      try {
+        const data = await api('/auth/update-password', {
+          method: 'POST',
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+
+        if (data.error) {
+          errorEl.textContent = data.error;
+          return;
+        }
+
+        successEl.textContent = 'Password updated successfully';
+        setTimeout(closeProfile, 1500);
+      } catch (err) {
+        errorEl.textContent = 'Failed to update password';
+      }
     }
 
     async function login() {
