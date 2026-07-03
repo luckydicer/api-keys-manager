@@ -241,14 +241,14 @@
       <p>Enter your API key to get started</p>
       <div class="form-group">
         <label>Provider</label>
-        <select id="providerSelect">
+        <select id="providerSelect" onchange="updateKeyPlaceholder()">
           <option value="openrouter">OpenRouter</option>
           <option value="chutes">Chutes</option>
         </select>
       </div>
       <div class="form-group">
         <label>API Key</label>
-        <input type="password" id="apiKeyInput" placeholder="sk-or-..." onkeydown="if(event.key==='Enter')submitApiKey()">
+        <input type="password" id="apiKeyInput" placeholder="sk-or-v1..." onkeydown="if(event.key==='Enter')submitApiKey()">
       </div>
       <button id="submitBtn" onclick="submitApiKey()">Continue</button>
       <div id="modalError" class="error hidden"></div>
@@ -402,6 +402,11 @@
       document.getElementById('headerProvider').textContent = provider.toUpperCase();
       sessionStorage.setItem('provider', provider);
       loadModels();
+    }
+
+    function updateKeyPlaceholder() {
+      const prov = document.getElementById('providerSelect').value;
+      document.getElementById('apiKeyInput').placeholder = prov === 'chutes' ? 'cpk_...' : 'sk-or-v1...';
     }
 
     async function sendMessage() {
