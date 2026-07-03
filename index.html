@@ -26,6 +26,7 @@
       background: var(--bg-primary);
       color: var(--text-primary);
       min-height: 100vh;
+      display: flex;
     }
     .modal-overlay {
       position: fixed;
@@ -69,7 +70,7 @@
       font-size: 13px;
       font-weight: 500;
     }
-    input, select {
+    input, select, textarea {
       width: 100%;
       padding: 12px 14px;
       background: var(--bg-tertiary);
@@ -80,13 +81,12 @@
       font-family: inherit;
       transition: all 0.2s;
     }
-    input:focus, select:focus {
+    input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
     button {
-      width: 100%;
       padding: 12px 20px;
       background: var(--accent);
       color: white;
@@ -100,106 +100,142 @@
     button:hover { background: var(--accent-hover); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
     .error { color: var(--danger); font-size: 13px; margin-top: 8px; text-align: center; }
-    .header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 24px;
+    .hidden { display: none !important; }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .sidebar {
+      width: 280px;
       background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .sidebar-header {
+      padding: 20px;
       border-bottom: 1px solid var(--border);
     }
-    .header-title { font-size: 18px; font-weight: 700; }
-    .header-provider { color: var(--accent); font-size: 12px; font-weight: 500; }
-    .main-content { padding: 24px; max-width: 1200px; margin: 0 auto; }
-    .config-card {
+    .sidebar-header h1 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .sidebar-provider {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+    .nav-section {
+      margin-bottom: 16px;
+    }
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 12px 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent); color: white; }
+    .nav-item .method {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .method-get { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .method-post { background: rgba(99, 102, 241, 0.2); color: var(--accent); }
+    .method-delete { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .nav-item.active .method { background: rgba(255,255,255,0.2); color: white; }
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .endpoint-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .endpoint-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .endpoint-path {
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .endpoint-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 8px;
+      max-width: 600px;
+    }
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+    .btn-secondary:hover { background: var(--border); }
+
+    .request-card, .response-card {
       background: var(--bg-secondary);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
-      margin-bottom: 20px;
     }
-    .config-row {
-      display: grid;
-      grid-template-columns: 1fr 200px 200px;
-      gap: 16px;
-    }
-    @media (max-width: 768px) { .config-row { grid-template-columns: 1fr; } }
     .card-title {
       font-size: 14px;
       font-weight: 600;
       color: var(--text-secondary);
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .chat-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    @media (max-width: 900px) { .chat-container { grid-template-columns: 1fr; } }
-    .chat-card, .response-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .chat-messages {
-      height: 400px;
-      overflow-y: auto;
-      padding: 16px;
-      background: var(--bg-tertiary);
-      border-radius: 10px;
-      margin-bottom: 16px;
-    }
-    .chat-message {
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin-bottom: 12px;
-      max-width: 85%;
-      line-height: 1.5;
-    }
-    .chat-message.user {
-      background: var(--accent);
-      color: white;
-      margin-left: auto;
-      border-bottom-right-radius: 4px;
-    }
-    .chat-message.assistant {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      border-bottom-left-radius: 4px;
-    }
-    textarea {
-      width: 100%;
-      padding: 12px 14px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-size: 14px;
-      font-family: inherit;
-      resize: vertical;
-      min-height: 80px;
-      margin-bottom: 12px;
-    }
-    textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-    .btn-row { display: flex; gap: 12px; }
-    .btn-secondary {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { background: var(--border); }
     .output-box {
       background: #0d1117;
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 16px;
-      min-height: 400px;
+      min-height: 300px;
       max-height: 500px;
       overflow-y: auto;
       font-family: 'Monaco', 'Menlo', monospace;
@@ -222,58 +258,45 @@
     }
     .output-status.success { background: rgba(34, 197, 94, 0.2); color: var(--success); }
     .output-status.error { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-    .loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .hidden { display: none !important; }
 
-    .model-select-wrapper {
-      position: relative;
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
     }
-    .model-select-input {
-      cursor: pointer;
-    }
-    .model-select-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      max-height: 300px;
-      overflow-y: auto;
-      z-index: 100;
-      margin-top: 4px;
-      display: none;
-    }
-    .model-select-dropdown.open { display: block; }
-    .model-select-dropdown input {
-      border-radius: 8px 8px 0 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .model-option {
-      padding: 10px 14px;
-      cursor: pointer;
+    .field-group { margin-bottom: 16px; }
+    .field-group label {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      transition: background 0.15s;
+      gap: 6px;
+      margin-bottom: 6px;
     }
-    .model-option:hover { background: var(--bg-tertiary); }
-    .model-option.selected { background: var(--accent); color: white; }
-    .model-option-name { font-size: 13px; }
-    .model-option-price { font-size: 11px; color: var(--text-muted); }
-    .model-option.selected .model-option-price { color: rgba(255,255,255,0.7); }
-    .model-option-id { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-    .model-option.selected .model-option-id { color: rgba(255,255,255,0.7); }
+    .field-required {
+      font-size: 10px;
+      padding: 2px 5px;
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      border-radius: 4px;
+    }
+    .field-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .json-input {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      min-height: 200px;
+    }
   </style>
 </head>
 <body>
@@ -297,58 +320,42 @@
     </div>
   </div>
 
-  <div id="mainApp" class="hidden">
-    <div class="header-bar">
-      <div>
-        <div class="header-title">API Inference Manager</div>
-        <div class="header-provider" id="headerProvider"></div>
+  <div id="mainApp" class="hidden" style="display: flex;">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1>API Inference Manager</h1>
+        <div class="sidebar-provider" id="sidebarProvider"></div>
       </div>
-      <button class="btn-secondary" onclick="logout()" style="width: auto; padding: 8px 16px;">Change API Key</button>
+      <nav class="sidebar-nav" id="endpointNav"></nav>
+      <div class="sidebar-footer">
+        <button class="btn-secondary" onclick="logout()" style="width: 100%;">Change API Key</button>
+      </div>
     </div>
 
     <div class="main-content">
-      <div class="config-card">
-        <div class="card-title">Configuration</div>
-        <div class="config-row">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label>Model</label>
-            <div class="model-select-wrapper">
-              <input type="text" id="modelSelectInput" class="model-select-input" placeholder="Search models..." readonly onclick="toggleModelDropdown()">
-              <div id="modelDropdown" class="model-select-dropdown"></div>
-            </div>
-            <input type="hidden" id="selectedModelId">
-          </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label>Temperature</label>
-            <input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
-          </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label>Max Tokens</label>
-            <input type="number" id="maxTokens" value="2048" min="1" max="32000">
-          </div>
+      <div class="endpoint-header">
+        <div>
+          <div class="endpoint-title" id="endpointTitle">Select an endpoint</div>
+          <div class="endpoint-path" id="endpointPath"></div>
+          <div class="endpoint-desc" id="endpointDesc"></div>
         </div>
       </div>
 
-      <div class="chat-container">
-        <div class="chat-card">
-          <div class="output-header">
-            <div class="card-title">Chat</div>
-          </div>
-          <div id="chatMessages" class="chat-messages"></div>
-          <textarea id="promptInput" placeholder="Enter your message..." onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
-          <div class="btn-row">
-            <button id="sendBtn" onclick="sendMessage()">Send</button>
-            <button class="btn-secondary" onclick="clearChat()">Clear</button>
-          </div>
+      <div class="request-card">
+        <div class="card-title">Request</div>
+        <div id="requestFields"></div>
+        <div class="btn-row">
+          <button id="sendBtn" onclick="sendRequest()">Send Request</button>
+          <button class="btn-secondary" onclick="clearResponse()">Clear</button>
         </div>
+      </div>
 
-        <div class="response-card">
-          <div class="output-header">
-            <div class="card-title">Response</div>
-            <span id="outputStatus" class="output-status">Ready</span>
-          </div>
-          <div id="outputBox" class="output-box"><pre style="color: var(--text-muted);">Response will appear here...</pre></div>
+      <div class="response-card">
+        <div class="output-header">
+          <div class="card-title" style="margin-bottom: 0;">Response</div>
+          <span id="outputStatus" class="output-status">Ready</span>
         </div>
+        <div id="responseBox" class="output-box"><pre style="color: var(--text-muted);">Response will appear here...</pre></div>
       </div>
     </div>
   </div>
@@ -359,116 +366,171 @@
       chutes: 'https://chutes.ai/api/v1'
     };
 
+    const ENDPOINTS = {
+      openrouter: [
+        {
+          id: 'chat_completions',
+          name: 'Chat Completions',
+          method: 'POST',
+          path: '/chat/completions',
+          description: 'Generate chat completions for a given conversational context.',
+          fields: [
+            { name: 'model', type: 'text', required: true, hint: 'Model ID (e.g., anthropic/claude-3-5-sonnet)' },
+            { name: 'messages', type: 'json', required: true, hint: 'Array of message objects with role and content' },
+            { name: 'temperature', type: 'number', default: 0.7, hint: 'Sampling temperature (0-2)' },
+            { name: 'max_tokens', type: 'number', default: 2048, hint: 'Maximum tokens to generate' },
+            { name: 'top_p', type: 'number', hint: 'Nucleus sampling threshold' },
+            { name: 'frequency_penalty', type: 'number', default: 0, hint: 'Frequency penalty (-2 to 2)' },
+            { name: 'presence_penalty', type: 'number', default: 0, hint: 'Presence penalty (-2 to 2)' },
+            { name: 'stop', type: 'text', hint: 'Up to 4 sequences where API will stop generating' },
+            { name: 'stream', type: 'boolean', default: false, hint: 'Enable server-sent events' },
+          ]
+        },
+        {
+          id: 'models',
+          name: 'List Models',
+          method: 'GET',
+          path: '/models',
+          description: 'Get a list of all available models.',
+          fields: []
+        },
+        {
+          id: 'model_info',
+          name: 'Model Info',
+          method: 'GET',
+          path: '/models/{model_id}',
+          description: 'Get details about a specific model.',
+          fields: [
+            { name: 'model_id', type: 'text', required: true, hint: 'The model ID (e.g., anthropic/claude-3-5-sonnet)' }
+          ]
+        },
+        {
+          id: 'info',
+          name: 'Instance Info',
+          method: 'GET',
+          path: '/info',
+          description: 'Get information about the current OpenRouter instance.',
+          fields: []
+        },
+        {
+          id: 'rankings',
+          name: 'Model Rankings',
+          method: 'GET',
+          path: '/rankings',
+          description: 'Get the ranked list of models.',
+          fields: []
+        },
+        {
+          id: 'api_keys',
+          name: 'API Keys',
+          method: 'GET',
+          path: '/api-keys',
+          description: 'Get the user\'s API keys.',
+          fields: []
+        },
+        {
+          id: 'generate_key',
+          name: 'Generate API Key',
+          method: 'POST',
+          path: '/api-keys',
+          description: 'Create a new API key.',
+          fields: [
+            { name: 'name', type: 'text', hint: 'Optional name for the key' }
+          ]
+        },
+        {
+          id: 'delete_key',
+          name: 'Delete API Key',
+          method: 'DELETE',
+          path: '/api-keys/{key_id}',
+          description: 'Delete an API key.',
+          fields: [
+            { name: 'key_id', type: 'text', required: true, hint: 'The API key ID to delete' }
+          ]
+        }
+      ],
+      chutes: [
+        {
+          id: 'chat_completions',
+          name: 'Chat Completions',
+          method: 'POST',
+          path: '/chat/completions',
+          description: 'Generate chat completions.',
+          fields: [
+            { name: 'model_id', type: 'text', required: true, hint: 'Model ID' },
+            { name: 'messages', type: 'json', required: true, hint: 'Array of message objects' },
+            { name: 'temperature', type: 'number', default: 0.7, hint: 'Sampling temperature' },
+            { name: 'max_tokens', type: 'number', default: 2048, hint: 'Maximum tokens' },
+            { name: 'stream', type: 'boolean', default: false }
+          ]
+        },
+        {
+          id: 'models',
+          name: 'List Models',
+          method: 'GET',
+          path: '/models',
+          description: 'Get a list of all available models.',
+          fields: []
+        },
+        {
+          id: 'model_info',
+          name: 'Model Info',
+          method: 'GET',
+          path: '/models/{model_id}',
+          description: 'Get details about a specific model.',
+          fields: [
+            { name: 'model_id', type: 'text', required: true, hint: 'Model ID' }
+          ]
+        },
+        {
+          id: 'image_generation',
+          name: 'Image Generation',
+          method: 'POST',
+          path: '/image/generation',
+          description: 'Generate images from text prompts.',
+          fields: [
+            { name: 'model_id', type: 'text', required: true, hint: 'Image model ID' },
+            { name: 'prompt', type: 'text', required: true, hint: 'Text description of desired image' },
+            { name: 'num_images', type: 'number', default: 1, hint: 'Number of images to generate' },
+            { name: 'aspect_ratio', type: 'text', hint: 'Aspect ratio (e.g., 1:1, 16:9)' },
+            { name: 'resolution', type: 'text', hint: 'Resolution (e.g., 512x512, 1024x1024)' }
+          ]
+        },
+        {
+          id: 'embeddings',
+          name: 'Embeddings',
+          method: 'POST',
+          path: '/embeddings',
+          description: 'Generate embeddings for text.',
+          fields: [
+            { name: 'model_id', type: 'text', required: true, hint: 'Embedding model ID' },
+            { name: 'text', type: 'text', required: true, hint: 'Text to embed' }
+          ]
+        }
+      ]
+    };
+
     let apiKey = '';
     let provider = '';
-    let models = [];
-    let chatHistory = [];
-    let selectedModel = null;
+    let currentEndpoint = null;
 
-    function formatPrice(price) {
-      if (!price && price !== 0) return 'N/A';
-      if (price === 0) return 'Free';
-      if (price < 0.001) return `$${(price * 1000000).toFixed(2)}/1M`;
-      if (price < 1) return `$${price.toFixed(4)}/1K`;
-      return `$${price.toFixed(2)}/1M`;
+    function updateKeyPlaceholder() {
+      const prov = document.getElementById('providerSelect').value;
+      document.getElementById('apiKeyInput').placeholder = prov === 'chutes' ? 'cpk_...' : 'sk-or-v1...';
     }
-
-    function getModelPrice(model) {
-      if (provider === 'openrouter') {
-        const pricing = model.pricing || model.price || {};
-        const prompt = pricing.prompt || pricing['prompt-1'] || 0;
-        const completion = pricing.completion || pricing['completion-1'] || 0;
-        if (prompt === 0 && completion === 0) return 'Free';
-        if (prompt === completion) return `$${(prompt * 1000000).toFixed(2)}/1M`;
-        return `$${(prompt * 1000000).toFixed(2)} in / $${(completion * 1000000).toFixed(2)} out`;
-      } else {
-        return model.pricing ? `$${model.pricing.toFixed(4)}/1M` : 'N/A';
-      }
-    }
-
-    function toggleModelDropdown() {
-      const dropdown = document.getElementById('modelDropdown');
-      dropdown.classList.toggle('open');
-      if (dropdown.classList.contains('open')) {
-        const searchInput = dropdown.querySelector('input');
-        if (searchInput) searchInput.focus();
-      }
-    }
-
-    function closeModelDropdown() {
-      document.getElementById('modelDropdown').classList.remove('open');
-    }
-
-    function renderModelDropdown(filter = '') {
-      const dropdown = document.getElementById('modelDropdown');
-      const filtered = models.filter(m => {
-        const name = (m.name || m.id || '').toLowerCase();
-        const id = (m.id || '').toLowerCase();
-        const q = filter.toLowerCase();
-        return !q || name.includes(q) || id.includes(q);
-      });
-
-      const selectedId = document.getElementById('selectedModelId').value;
-
-      let html = `<input type="text" placeholder="Search models..." onkeyup="filterModels(this.value)" style="border-radius: 8px 8px 0 0; border-bottom: 1px solid var(--border);">`;
-
-      if (filtered.length === 0) {
-        html += `<div class="model-option" style="color: var(--text-muted);">No models found</div>`;
-      } else {
-        filtered.slice(0, 100).forEach(m => {
-          const price = getModelPrice(m);
-          const isSelected = m.id === selectedId;
-          html += `
-            <div class="model-option ${isSelected ? 'selected' : ''}" onclick="selectModel('${m.id.replace(/'/g, "\\'")}')">
-              <div>
-                <div class="model-option-name">${m.name || m.id}</div>
-                <div class="model-option-id">${m.id}</div>
-              </div>
-              <div class="model-option-price">${price}</div>
-            </div>
-          `;
-        });
-        if (filtered.length > 100) {
-          html += `<div class="model-option" style="color: var(--text-muted);">Showing 100 of ${filtered.length} models</div>`;
-        }
-      }
-
-      dropdown.innerHTML = html;
-    }
-
-    function filterModels(query) {
-      renderModelDropdown(query);
-    }
-
-    function selectModel(modelId) {
-      const model = models.find(m => m.id === modelId);
-      if (!model) return;
-
-      selectedModel = model;
-      document.getElementById('selectedModelId').value = modelId;
-      document.getElementById('modelSelectInput').value = model.name || modelId;
-      closeModelDropdown();
-    }
-
-    document.addEventListener('click', (e) => {
-      const wrapper = document.querySelector('.model-select-wrapper');
-      if (wrapper && !wrapper.contains(e.target)) {
-        closeModelDropdown();
-      }
-    });
 
     function logout() {
       sessionStorage.removeItem('apiKey');
       sessionStorage.removeItem('provider');
-      sessionStorage.removeItem('chatHistory');
-      chatHistory = [];
-      selectedModel = null;
+      apiKey = '';
+      provider = '';
+      currentEndpoint = null;
       document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('mainApp').style.display = 'none';
       document.getElementById('apiKeyModal').classList.remove('hidden');
+      document.getElementById('apiKeyModal').style.display = 'flex';
       document.getElementById('apiKeyInput').value = '';
       document.getElementById('modalError').classList.add('hidden');
-      document.getElementById('selectedModelId').value = '';
-      document.getElementById('modelSelectInput').value = '';
     }
 
     async function submitApiKey() {
@@ -490,107 +552,237 @@
       btn.innerHTML = '<span class="loading"></span>';
 
       try {
-        await loadModels();
+        await testConnection();
         sessionStorage.setItem('apiKey', apiKey);
         sessionStorage.setItem('provider', provider);
         document.getElementById('apiKeyModal').classList.add('hidden');
+        document.getElementById('apiKeyModal').style.display = 'none';
         document.getElementById('mainApp').classList.remove('hidden');
-        document.getElementById('headerProvider').textContent = provider.toUpperCase();
+        document.getElementById('mainApp').style.display = 'flex';
+        document.getElementById('sidebarProvider').textContent = provider.toUpperCase();
+        renderEndpointNav();
+        selectEndpoint(ENDPOINTS[provider][0]);
       } catch (err) {
-        errorEl.textContent = 'Failed to load models. Check your API key.';
+        errorEl.textContent = 'Failed to connect. Check your API key.';
         errorEl.classList.remove('hidden');
         btn.disabled = false;
         btn.textContent = 'Continue';
       }
     }
 
-    async function loadModels() {
+    async function testConnection() {
       const baseUrl = API_URLS[provider];
       const response = await fetch(`${baseUrl}/models`, {
         headers: { 'Authorization': `Bearer ${apiKey}` }
       });
-
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        throw new Error(err.error?.message || 'Failed to fetch models');
+        throw new Error(err.error?.message || 'Connection failed');
       }
-
-      const data = await response.json();
-      models = data.data || [];
-
-      if (provider === 'openrouter') {
-        models.sort((a, b) => {
-          const aTop = a.id.includes('claude') || a.id.includes('gpt') || a.id.includes('sonnet');
-          const bTop = b.id.includes('claude') || b.id.includes('gpt') || b.id.includes('sonnet');
-          if (aTop && !bTop) return -1;
-          if (!aTop && bTop) return 1;
-          return 0;
-        });
-      }
-
-      renderModelDropdown();
     }
 
-    async function sendMessage() {
-      const model = document.getElementById('selectedModelId').value;
-      const prompt = document.getElementById('promptInput').value.trim();
-      const temperature = parseFloat(document.getElementById('temperature').value);
-      const maxTokens = parseInt(document.getElementById('maxTokens').value);
+    function renderEndpointNav() {
+      const nav = document.getElementById('endpointNav');
+      const endpoints = ENDPOINTS[provider];
 
-      if (!model) { alert('Please select a model'); return; }
-      if (!prompt) { alert('Please enter a message'); return; }
+      const grouped = {
+        'Chat': endpoints.filter(e => e.id.includes('chat')),
+        'Models': endpoints.filter(e => e.id.includes('model') || e.id.includes('models')),
+        'API Keys': endpoints.filter(e => e.id.includes('key')),
+        'Other': endpoints.filter(e => !e.id.includes('chat') && !e.id.includes('model') && !e.id.includes('models') && !e.id.includes('key'))
+      };
+
+      let html = '';
+      for (const [group, items] of Object.entries(grouped)) {
+        if (items.length === 0) continue;
+        html += `<div class="nav-section">
+          <div class="nav-section-title">${group}</div>`;
+        for (const ep of items) {
+          const methodClass = ep.method.toLowerCase();
+          html += `<div class="nav-item" data-endpoint="${ep.id}" onclick="selectEndpoint(ENDPOINTS['${provider}'].find(e => e.id === '${ep.id}'))">
+            <span class="method method-${methodClass}">${ep.method}</span>
+            <span>${ep.name}</span>
+          </div>`;
+        }
+        html += '</div>';
+      }
+
+      nav.innerHTML = html;
+    }
+
+    function selectEndpoint(endpoint) {
+      currentEndpoint = endpoint;
+
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelector(`[data-endpoint="${endpoint.id}"]`)?.classList.add('active');
+
+      document.getElementById('endpointTitle').textContent = endpoint.name;
+      document.getElementById('endpointPath').textContent = `${endpoint.method} ${endpoint.path}`;
+      document.getElementById('endpointDesc').textContent = endpoint.description;
+
+      renderRequestFields(endpoint);
+      clearResponse();
+    }
+
+    function renderRequestFields(endpoint) {
+      const container = document.getElementById('requestFields');
+
+      if (endpoint.fields.length === 0) {
+        if (endpoint.method === 'GET') {
+          container.innerHTML = '<p style="color: var(--text-muted);">This endpoint has no parameters.</p>';
+        } else {
+          container.innerHTML = '<p style="color: var(--text-muted);">Send an empty request body.</p>';
+        }
+        return;
+      }
+
+      let html = '<div class="fields-grid">';
+
+      for (const field of endpoint.fields) {
+        const value = field.default !== undefined ? (field.default === false ? 'false' : field.default) : '';
+
+        if (field.type === 'json') {
+          html += `<div class="field-group" style="grid-column: 1 / -1;">
+            <label>${field.name} ${field.required ? '<span class="field-required">required</span>' : ''}</label>
+            <textarea id="field_${field.name}" placeholder='[{"role": "user", "content": "Hello"}]'>${value}</textarea>
+            ${field.hint ? `<div class="field-hint">${field.hint}</div>` : ''}
+          </div>`;
+        } else if (field.type === 'boolean') {
+          html += `<div class="field-group">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="field_${field.name}" ${value === 'false' ? '' : 'checked'}>
+              ${field.name} ${field.required ? '<span class="field-required">required</span>' : ''}
+            </label>
+            ${field.hint ? `<div class="field-hint">${field.hint}</div>` : ''}
+          </div>`;
+        } else if (field.type === 'number') {
+          html += `<div class="field-group">
+            <label>${field.name} ${field.required ? '<span class="field-required">required</span>' : ''}</label>
+            <input type="number" id="field_${field.name}" value="${value}" step="any">
+            ${field.hint ? `<div class="field-hint">${field.hint}</div>` : ''}
+          </div>`;
+        } else {
+          html += `<div class="field-group">
+            <label>${field.name} ${field.required ? '<span class="field-required">required</span>' : ''}</label>
+            <input type="text" id="field_${field.name}" placeholder="${field.hint || ''}" value="${value}">
+            ${field.hint && !field.hint.includes('e.g.') ? `<div class="field-hint">${field.hint}</div>` : ''}
+          </div>`;
+        }
+      }
+
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function buildRequestBody() {
+      if (!currentEndpoint || currentEndpoint.fields.length === 0) {
+        return {};
+      }
+
+      const body = {};
+      for (const field of currentEndpoint.fields) {
+        const el = document.getElementById(`field_${field.name}`);
+        if (!el) continue;
+
+        if (field.type === 'json') {
+          try {
+            const val = el.value.trim();
+            if (val) body[field.name] = JSON.parse(val);
+          } catch (e) {
+            alert(`Invalid JSON in ${field.name}: ${e.message}`);
+            return null;
+          }
+        } else if (field.type === 'boolean') {
+          body[field.name] = el.checked;
+        } else if (field.type === 'number') {
+          const val = parseFloat(el.value);
+          if (!isNaN(val)) body[field.name] = val;
+        } else {
+          const val = el.value.trim();
+          if (val) body[field.name] = val;
+        }
+      }
+      return body;
+    }
+
+    function buildPath(path, body) {
+      let finalPath = path;
+      const pathParams = path.match(/\{(\w+)\}/g) || [];
+      for (const param of pathParams) {
+        const key = param.replace(/[{}]/g, '');
+        if (body[key]) {
+          finalPath = finalPath.replace(param, body[key]);
+          delete body[key];
+        } else {
+          const el = document.getElementById(`field_${key}`);
+          if (el && el.value.trim()) {
+            finalPath = finalPath.replace(param, el.value.trim());
+          }
+        }
+      }
+      return finalPath;
+    }
+
+    async function sendRequest() {
+      if (!currentEndpoint) {
+        alert('Please select an endpoint');
+        return;
+      }
+
+      const baseUrl = API_URLS[provider];
+      let body = buildRequestBody();
+      if (body === null) return;
+
+      const path = buildPath(currentEndpoint.path, body);
+      const method = currentEndpoint.method;
 
       const sendBtn = document.getElementById('sendBtn');
       sendBtn.disabled = true;
       sendBtn.innerHTML = '<span class="loading"></span>';
 
-      const outputBox = document.getElementById('outputBox');
+      const outputBox = document.getElementById('responseBox');
       const statusEl = document.getElementById('outputStatus');
       statusEl.textContent = 'Loading...';
       statusEl.className = 'output-status';
+      outputBox.innerHTML = '<pre style="color: var(--text-muted);">Loading...</pre>';
 
-      chatHistory.push({ role: 'user', content: prompt });
-      renderChat();
-
-      document.getElementById('promptInput').value = '';
+      const hasBody = method !== 'GET' && Object.keys(body).length > 0;
 
       try {
-        const baseUrl = API_URLS[provider];
-        let body;
-        let endpoint = '/chat/completions';
-
-        if (provider === 'openrouter') {
-          body = { model, messages: chatHistory, temperature, max_tokens: maxTokens };
-        } else {
-          body = { model_id: model, messages: chatHistory, temperature, max_tokens: maxTokens };
-        }
-
-        const response = await fetch(`${baseUrl}${endpoint}`, {
-          method: 'POST',
+        const options = {
+          method,
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
             'HTTP-Referer': 'https://api-inference-manager.com',
             'X-Title': 'API Inference Manager'
-          },
-          body: JSON.stringify(body)
-        });
+          }
+        };
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error?.message || 'API request failed');
+        if (hasBody) {
+          options.body = JSON.stringify(body);
         }
 
-        const content = data.choices?.[0]?.message?.content || '';
-        if (content) {
-          chatHistory.push({ role: 'assistant', content });
-          renderChat();
+        const response = await fetch(`${baseUrl}${path}`, options);
+        const contentType = response.headers.get('content-type');
+
+        let data;
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          data = { raw: await response.text() };
+        }
+
+        if (!response.ok) {
+          outputBox.innerHTML = `<pre style="color: var(--danger);">${JSON.stringify(data, null, 2)}</pre>`;
+          statusEl.textContent = `${response.status} Error`;
+          statusEl.className = 'output-status error';
+          return;
         }
 
         outputBox.innerHTML = `<pre><code class="language-json">${JSON.stringify(data, null, 2)}</code></pre>`;
         hljs.highlightElement(outputBox.querySelector('code'));
-        statusEl.textContent = 'Success';
+        statusEl.textContent = `${response.status} OK`;
         statusEl.className = 'output-status success';
       } catch (err) {
         outputBox.innerHTML = `<pre style="color: var(--danger);">Error: ${err.message}</pre>`;
@@ -598,24 +790,12 @@
         statusEl.className = 'output-status error';
       } finally {
         sendBtn.disabled = false;
-        sendBtn.textContent = 'Send';
-        sessionStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+        sendBtn.textContent = 'Send Request';
       }
     }
 
-    function renderChat() {
-      const container = document.getElementById('chatMessages');
-      container.innerHTML = chatHistory.map(m => `
-        <div class="chat-message ${m.role}">${m.content}</div>
-      `).join('');
-      container.scrollTop = container.scrollHeight;
-    }
-
-    function clearChat() {
-      chatHistory = [];
-      sessionStorage.removeItem('chatHistory');
-      renderChat();
-      document.getElementById('outputBox').innerHTML = '<pre style="color: var(--text-muted);">Response will appear here...</pre>';
+    function clearResponse() {
+      document.getElementById('responseBox').innerHTML = '<pre style="color: var(--text-muted);">Response will appear here...</pre>';
       document.getElementById('outputStatus').textContent = 'Ready';
       document.getElementById('outputStatus').className = 'output-status';
     }
@@ -623,21 +803,17 @@
     function init() {
       const savedKey = sessionStorage.getItem('apiKey');
       const savedProvider = sessionStorage.getItem('provider');
-      const savedHistory = sessionStorage.getItem('chatHistory');
 
       if (savedKey && savedProvider) {
         apiKey = savedKey;
         provider = savedProvider;
         document.getElementById('apiKeyModal').classList.add('hidden');
+        document.getElementById('apiKeyModal').style.display = 'none';
         document.getElementById('mainApp').classList.remove('hidden');
-        document.getElementById('headerProvider').textContent = provider.toUpperCase();
-
-        loadModels().then(() => {
-          if (savedHistory) {
-            chatHistory = JSON.parse(savedHistory);
-            renderChat();
-          }
-        });
+        document.getElementById('mainApp').style.display = 'flex';
+        document.getElementById('sidebarProvider').textContent = provider.toUpperCase();
+        renderEndpointNav();
+        selectEndpoint(ENDPOINTS[provider][0]);
       }
     }
 
