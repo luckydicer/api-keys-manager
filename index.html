@@ -120,9 +120,10 @@
     }
     .config-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: 1fr 200px 200px;
       gap: 16px;
     }
+    @media (max-width: 768px) { .config-row { grid-template-columns: 1fr; } }
     .card-title {
       font-size: 14px;
       font-weight: 600;
@@ -232,6 +233,47 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .hidden { display: none !important; }
+
+    .model-select-wrapper {
+      position: relative;
+    }
+    .model-select-input {
+      cursor: pointer;
+    }
+    .model-select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      margin-top: 4px;
+      display: none;
+    }
+    .model-select-dropdown.open { display: block; }
+    .model-select-dropdown input {
+      border-radius: 8px 8px 0 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .model-option {
+      padding: 10px 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s;
+    }
+    .model-option:hover { background: var(--bg-tertiary); }
+    .model-option.selected { background: var(--accent); color: white; }
+    .model-option-name { font-size: 13px; }
+    .model-option-price { font-size: 11px; color: var(--text-muted); }
+    .model-option.selected .model-option-price { color: rgba(255,255,255,0.7); }
+    .model-option-id { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .model-option.selected .model-option-id { color: rgba(255,255,255,0.7); }
   </style>
 </head>
 <body>
@@ -268,24 +310,19 @@
       <div class="config-card">
         <div class="card-title">Configuration</div>
         <div class="config-row">
-          <div class="form-group">
-            <label>Provider</label>
-            <select id="appProviderSelect" onchange="onProviderChange()">
-              <option value="openrouter">OpenRouter</option>
-              <option value="chutes">Chutes</option>
-            </select>
-          </div>
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom: 0;">
             <label>Model</label>
-            <select id="modelSelect">
-              <option value="">Select model...</option>
-            </select>
+            <div class="model-select-wrapper">
+              <input type="text" id="modelSelectInput" class="model-select-input" placeholder="Search models..." readonly onclick="toggleModelDropdown()">
+              <div id="modelDropdown" class="model-select-dropdown"></div>
+            </div>
+            <input type="hidden" id="selectedModelId">
           </div>
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom: 0;">
             <label>Temperature</label>
             <input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
           </div>
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom: 0;">
             <label>Max Tokens</label>
             <input type="number" id="maxTokens" value="2048" min="1" max="32000">
           </div>
@@ -326,16 +363,112 @@
     let provider = '';
     let models = [];
     let chatHistory = [];
+    let selectedModel = null;
+
+    function formatPrice(price) {
+      if (!price && price !== 0) return 'N/A';
+      if (price === 0) return 'Free';
+      if (price < 0.001) return `$${(price * 1000000).toFixed(2)}/1M`;
+      if (price < 1) return `$${price.toFixed(4)}/1K`;
+      return `$${price.toFixed(2)}/1M`;
+    }
+
+    function getModelPrice(model) {
+      if (provider === 'openrouter') {
+        const pricing = model.pricing || model.price || {};
+        const prompt = pricing.prompt || pricing['prompt-1'] || 0;
+        const completion = pricing.completion || pricing['completion-1'] || 0;
+        if (prompt === 0 && completion === 0) return 'Free';
+        if (prompt === completion) return `$${(prompt * 1000000).toFixed(2)}/1M`;
+        return `$${(prompt * 1000000).toFixed(2)} in / $${(completion * 1000000).toFixed(2)} out`;
+      } else {
+        return model.pricing ? `$${model.pricing.toFixed(4)}/1M` : 'N/A';
+      }
+    }
+
+    function toggleModelDropdown() {
+      const dropdown = document.getElementById('modelDropdown');
+      dropdown.classList.toggle('open');
+      if (dropdown.classList.contains('open')) {
+        const searchInput = dropdown.querySelector('input');
+        if (searchInput) searchInput.focus();
+      }
+    }
+
+    function closeModelDropdown() {
+      document.getElementById('modelDropdown').classList.remove('open');
+    }
+
+    function renderModelDropdown(filter = '') {
+      const dropdown = document.getElementById('modelDropdown');
+      const filtered = models.filter(m => {
+        const name = (m.name || m.id || '').toLowerCase();
+        const id = (m.id || '').toLowerCase();
+        const q = filter.toLowerCase();
+        return !q || name.includes(q) || id.includes(q);
+      });
+
+      const selectedId = document.getElementById('selectedModelId').value;
+
+      let html = `<input type="text" placeholder="Search models..." onkeyup="filterModels(this.value)" style="border-radius: 8px 8px 0 0; border-bottom: 1px solid var(--border);">`;
+
+      if (filtered.length === 0) {
+        html += `<div class="model-option" style="color: var(--text-muted);">No models found</div>`;
+      } else {
+        filtered.slice(0, 100).forEach(m => {
+          const price = getModelPrice(m);
+          const isSelected = m.id === selectedId;
+          html += `
+            <div class="model-option ${isSelected ? 'selected' : ''}" onclick="selectModel('${m.id.replace(/'/g, "\\'")}')">
+              <div>
+                <div class="model-option-name">${m.name || m.id}</div>
+                <div class="model-option-id">${m.id}</div>
+              </div>
+              <div class="model-option-price">${price}</div>
+            </div>
+          `;
+        });
+        if (filtered.length > 100) {
+          html += `<div class="model-option" style="color: var(--text-muted);">Showing 100 of ${filtered.length} models</div>`;
+        }
+      }
+
+      dropdown.innerHTML = html;
+    }
+
+    function filterModels(query) {
+      renderModelDropdown(query);
+    }
+
+    function selectModel(modelId) {
+      const model = models.find(m => m.id === modelId);
+      if (!model) return;
+
+      selectedModel = model;
+      document.getElementById('selectedModelId').value = modelId;
+      document.getElementById('modelSelectInput').value = model.name || modelId;
+      closeModelDropdown();
+    }
+
+    document.addEventListener('click', (e) => {
+      const wrapper = document.querySelector('.model-select-wrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        closeModelDropdown();
+      }
+    });
 
     function logout() {
       sessionStorage.removeItem('apiKey');
       sessionStorage.removeItem('provider');
       sessionStorage.removeItem('chatHistory');
       chatHistory = [];
+      selectedModel = null;
       document.getElementById('mainApp').classList.add('hidden');
       document.getElementById('apiKeyModal').classList.remove('hidden');
       document.getElementById('apiKeyInput').value = '';
       document.getElementById('modalError').classList.add('hidden');
+      document.getElementById('selectedModelId').value = '';
+      document.getElementById('modelSelectInput').value = '';
     }
 
     async function submitApiKey() {
@@ -362,7 +495,6 @@
         sessionStorage.setItem('provider', provider);
         document.getElementById('apiKeyModal').classList.add('hidden');
         document.getElementById('mainApp').classList.remove('hidden');
-        document.getElementById('appProviderSelect').value = provider;
         document.getElementById('headerProvider').textContent = provider.toUpperCase();
       } catch (err) {
         errorEl.textContent = 'Failed to load models. Check your API key.';
@@ -386,31 +518,21 @@
       const data = await response.json();
       models = data.data || [];
 
-      const modelSelect = document.getElementById('modelSelect');
       if (provider === 'openrouter') {
-        models.sort((a, b) => (b.id.includes('claude') || b.id.includes('gpt') ? -1 : 0));
-        modelSelect.innerHTML = '<option value="">Select model...</option>' +
-          models.map(m => `<option value="${m.id}">${m.name || m.id}</option>`).join('');
-      } else {
-        modelSelect.innerHTML = '<option value="">Select model...</option>' +
-          models.slice(0, 50).map(m => `<option value="${m.id}">${m.name || m.id}</option>`).join('');
+        models.sort((a, b) => {
+          const aTop = a.id.includes('claude') || a.id.includes('gpt') || a.id.includes('sonnet');
+          const bTop = b.id.includes('claude') || b.id.includes('gpt') || b.id.includes('sonnet');
+          if (aTop && !bTop) return -1;
+          if (!aTop && bTop) return 1;
+          return 0;
+        });
       }
-    }
 
-    function onProviderChange() {
-      provider = document.getElementById('appProviderSelect').value;
-      document.getElementById('headerProvider').textContent = provider.toUpperCase();
-      sessionStorage.setItem('provider', provider);
-      loadModels();
-    }
-
-    function updateKeyPlaceholder() {
-      const prov = document.getElementById('providerSelect').value;
-      document.getElementById('apiKeyInput').placeholder = prov === 'chutes' ? 'cpk_...' : 'sk-or-v1...';
+      renderModelDropdown();
     }
 
     async function sendMessage() {
-      const model = document.getElementById('modelSelect').value;
+      const model = document.getElementById('selectedModelId').value;
       const prompt = document.getElementById('promptInput').value.trim();
       const temperature = parseFloat(document.getElementById('temperature').value);
       const maxTokens = parseInt(document.getElementById('maxTokens').value);
@@ -508,7 +630,6 @@
         provider = savedProvider;
         document.getElementById('apiKeyModal').classList.add('hidden');
         document.getElementById('mainApp').classList.remove('hidden');
-        document.getElementById('appProviderSelect').value = provider;
         document.getElementById('headerProvider').textContent = provider.toUpperCase();
 
         loadModels().then(() => {
